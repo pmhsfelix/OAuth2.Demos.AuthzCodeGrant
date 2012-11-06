@@ -34,10 +34,10 @@ namespace OAuth2.Demos.AuthzCodeGrant
         };
 
         public static readonly Resource ExampleResource = new Resource
-                                                                 {
-                                                                     Uri = "https://api.github.com/user",
-                                                                     Scope = "user repo"
-                                                                 };
+        {
+            Uri = "https://api.github.com/user",
+            Scope = "user repo"
+        };
     }
 
     internal class Program
@@ -45,11 +45,11 @@ namespace OAuth2.Demos.AuthzCodeGrant
         private static void Main(string[] args)
         {
             Log.Info("Hi, welcome to the OAuth 2.0 Authorization Code Grant Demo");
-            if(Config.Client.client_id == null || Config.Client.client_secret == null)
+            if (Config.Client.client_id == null || Config.Client.client_secret == null)
             {
                 Log.Warn(
                     "The client_id or the client_secret are not configured."
-                    +" Please register a client application and set these properties on the Config class");
+                    + " Please register a client application and set these properties on the Config class");
                 Log.Warn("E.g. for a GitHub client, go to 'Account settings/Application', on the GitHub site");
                 return;
             }
@@ -165,9 +165,10 @@ namespace OAuth2.Demos.AuthzCodeGrant
                         return resourceResp;
                     }
                 }
-            }catch(Exception e)
+            }
+            catch (Exception e)
             {
-                return Error("An expected exception just happened, sorry: {0}",e.Message);
+                return Error("An expected exception just happened, sorry: {0}", e.Message);
             }
         }
 
@@ -267,9 +268,9 @@ namespace OAuth2.Demos.AuthzCodeGrant
         }
         public static string RandomBits(this int size)
         {
-            using(var rg = RandomNumberGenerator.Create())
+            using (var rg = RandomNumberGenerator.Create())
             {
-                var bytes = new byte[(size + 7)/8];
+                var bytes = new byte[(size + 7) / 8];
                 rg.GetBytes(bytes);
                 return Convert.ToBase64String(bytes);
             }
