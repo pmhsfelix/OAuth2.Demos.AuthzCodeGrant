@@ -8,7 +8,6 @@ using System.Net.Http.Headers;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.SelfHost;
@@ -40,7 +39,6 @@ namespace OAuth2.Demos.AuthzCodeGrant
                                                                      Scope = "user repo"
                                                                  };
     }
-
 
     internal class Program
     {
