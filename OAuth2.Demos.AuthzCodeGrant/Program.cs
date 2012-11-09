@@ -19,8 +19,8 @@ namespace OAuth2.Demos.AuthzCodeGrant
         // TODO Set the client_id and client_secret with your client settings
         public static readonly ClientRegistration Client = new ClientRegistration
         {
-            client_id = null,
-            client_secret = null,
+            client_id = "",
+            client_secret = "",
 
             // HACK to simplify the hosting, we use an HTTP URI. 
             // In production it should always be HTTPS
@@ -29,14 +29,14 @@ namespace OAuth2.Demos.AuthzCodeGrant
 
         public static readonly AuthorizationServer AuthzServer = new AuthorizationServer
         {
-            AuthorizationEndpoint = "https://github.com/login/oauth/authorize",
-            TokenEndpoint = "https://github.com/login/oauth/access_token",
+            AuthorizationEndpoint = "",
+            TokenEndpoint = "",
         };
 
         public static readonly Resource ExampleResource = new Resource
         {
-            Uri = "https://api.github.com/user",
-            Scope = "user repo"
+            Uri = "https://services.sapo.pt/connect/oauth2/support/echo",
+            Scope = "connect/oauth2/support"
         };
     }
 
@@ -70,6 +70,7 @@ namespace OAuth2.Demos.AuthzCodeGrant
                                        client_id = Config.Client.client_id,
                                        response_type = "code",
                                        scope = Config.ExampleResource.Scope,
+                                       redirect_uri = Config.Client.redirect_uri,
                                        state = 128.RandomBits()
                                    };
             Db.State = authzRequest.state;
@@ -103,7 +104,7 @@ namespace OAuth2.Demos.AuthzCodeGrant
                 }
                 Log.Info("Good, the request was sucessfull. Lets see if the returned state matches the sent state...");
 
-                if (authzResponse.state != Db.State)
+                if (HttpUtility.UrlDecode(authzResponse.state) != Db.State)
                 {
                     return Error("Hum, the returned state does not match the send state. Ignoring the response, sorry.");
                 }
@@ -190,6 +191,7 @@ namespace OAuth2.Demos.AuthzCodeGrant
         public string scope { get; set; }
         public string state { get; set; }
         public string response_type { get; set; }
+        public string redirect_uri { get; set; }
     }
 
     // The response message returned by the Authorization Endpoint
