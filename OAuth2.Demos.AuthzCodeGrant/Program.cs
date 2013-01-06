@@ -19,8 +19,8 @@ namespace OAuth2.Demos.AuthzCodeGrant
         // TODO Set the client_id and client_secret with your client settings
         public static readonly ClientRegistration Client = new ClientRegistration
         {
-            client_id = "",
-            client_secret = "",
+            client_id = null,
+            client_secret = null,
 
             // HACK to simplify the hosting, we use an HTTP URI. 
             // In production it should always be HTTPS
@@ -29,14 +29,14 @@ namespace OAuth2.Demos.AuthzCodeGrant
 
         public static readonly AuthorizationServer AuthzServer = new AuthorizationServer
         {
-            AuthorizationEndpoint = "",
-            TokenEndpoint = "",
+            AuthorizationEndpoint = "https://github.com/login/oauth/authorize",
+            TokenEndpoint = "https://github.com/login/oauth/access_token",
         };
 
         public static readonly Resource ExampleResource = new Resource
         {
-            Uri = "https://services.sapo.pt/connect/oauth2/support/echo",
-            Scope = "connect/oauth2/support"
+            Uri = "https://api.github.com/user",
+            Scope = "user repo"
         };
     }
 
