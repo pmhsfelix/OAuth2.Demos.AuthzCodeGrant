@@ -22,21 +22,22 @@ namespace OAuth2.Demos.AuthzCodeGrant
             client_id = null,
             client_secret = null,
 
-            // HACK to simplify the hosting, we use an HTTP URI. 
+            // HACK to simplify the hosting, we can use an HTTP URI. 
             // In production it should always be HTTPS
-            redirect_uri = "http://localhost:8080/callback"
+            redirect_uri = "https://localhost:4443/callback"
         };
 
         public static readonly AuthorizationServer AuthzServer = new AuthorizationServer
         {
             AuthorizationEndpoint = "https://github.com/login/oauth/authorize",
             TokenEndpoint = "https://github.com/login/oauth/access_token",
+            UseAuthorizationHeader = false,
         };
 
         public static readonly Resource ExampleResource = new Resource
         {
             Uri = "https://api.github.com/user",
-            Scope = "user repo"
+            Scope = "user"
         };
     }
 
@@ -104,7 +105,7 @@ namespace OAuth2.Demos.AuthzCodeGrant
                 }
                 Log.Info("Good, the request was sucessfull. Lets see if the returned state matches the sent state...");
 
-                if (HttpUtility.UrlDecode(authzResponse.state) != Db.State)
+                if (authzResponse.state != Db.State)
                 {
                     return Error("Hum, the returned state does not match the send state. Ignoring the response, sorry.");
                 }
@@ -118,13 +119,21 @@ namespace OAuth2.Demos.AuthzCodeGrant
                                                code = authzResponse.code,
                                                grant_type = "authorization_code",
                                                redirect_uri = Config.Client.redirect_uri,
-
-                                               client_id = Config.Client.client_id,
-                                               client_secret = Config.Client.client_secret
                                            };
 
                     // Just because GitHub requires it (but the OAuth 2.0 RFC does not)
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    if (Config.AuthzServer.UseAuthorizationHeader)
+                    {
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
+                            Convert.ToBase64String(
+                                Encoding.ASCII.GetBytes(Config.Client.client_id + ":" + Config.Client.client_secret)));
+                    }
+                    else
+                    {
+                        tokenRequest.client_id = Config.Client.client_id;
+                        tokenRequest.client_secret = Config.Client.client_secret;
+                    }
 
                     var resp = client.PostAsync(Config.AuthzServer.TokenEndpoint,
                                                 new FormUrlEncodedContent(tokenRequest.ToPairs())).Result;
@@ -132,6 +141,10 @@ namespace OAuth2.Demos.AuthzCodeGrant
                     if (resp.StatusCode == HttpStatusCode.InternalServerError)
                     {
                         return Error("Apparently we broke the authorization server, ending.");
+                    }
+                    if (resp.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        return Error("Something is missing, ending.");
                     }
                     if (resp.StatusCode == HttpStatusCode.BadRequest)
                     {
@@ -230,6 +243,7 @@ namespace OAuth2.Demos.AuthzCodeGrant
     {
         public string AuthorizationEndpoint { get; set; }
         public string TokenEndpoint { get; set; }
+        public bool UseAuthorizationHeader { get; set; }
     }
 
     // The characterization of a Client
@@ -259,6 +273,7 @@ namespace OAuth2.Demos.AuthzCodeGrant
         {
             return obj.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(p => p.GetIndexParameters().Length == 0)
+                .Where(p => p.GetValue(obj) != null)
                 .Select(p => new KeyValuePair<string, string>(p.Name, p.GetValue(obj).ToString()));
         }
         public static string ToQueryString(this IEnumerable<KeyValuePair<string, string>> pairs)
