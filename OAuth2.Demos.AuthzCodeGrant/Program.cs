@@ -174,6 +174,7 @@ namespace OAuth2.Demos.AuthzCodeGrant
                     {
                         var request = new HttpRequestMessage(HttpMethod.Get, Config.ExampleResource.Uri);
                         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", theAccessToken);
+                        request.Headers.UserAgent.Add(new ProductInfoHeaderValue("OAuth2DemosAuthzCodeGrant","1.0"));
                         var resourceResp = resourceClient.SendAsync(request).Result;
                         Log.Info("Returning the resource server response, I hope you liked this demo ...");
                         return resourceResp;
@@ -182,7 +183,7 @@ namespace OAuth2.Demos.AuthzCodeGrant
             }
             catch (Exception e)
             {
-                return Error("An expected exception just happened, sorry: {0}", e.Message);
+                return Error("An unexpected exception just happened, sorry: {0}", e.Message);
             }
         }
 
